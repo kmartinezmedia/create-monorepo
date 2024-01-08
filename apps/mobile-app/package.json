@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
+    "eas-build-pre-install": "bun install && bun ../../patches/patch-packages.ts",
     "eas-build-post-install": "bun turbo run build --filter=mobile-app",
     "dev": "cli expo dev --platform ios --profile debug",
     "build:ios-debug": "cli expo build --platform ios --profile debug",

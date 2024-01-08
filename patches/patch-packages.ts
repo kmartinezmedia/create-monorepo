@@ -2,7 +2,7 @@
 
 import path from 'node:path';
 
-console.log('running patch');
+console.log('checking patch');
 
 const boostOriginalFile = path.resolve(
   import.meta.dir,
@@ -20,12 +20,12 @@ const proc = Bun.spawnSync(['diff', boostOriginalFile, boostUpdatedFile]);
 
 const result = await new Response(proc.stdout).text();
 
-console.log(result);
-
 if (result) {
+  console.log('running patch');
   Bun.spawnSync(['patch', '-u', boostOriginalFile, '-i', boostPatch]);
+  console.log('patch done');
+} else {
+  console.log('patch not needed');
 }
-
-console.log('patched finished');
 
 process.exit(0);
