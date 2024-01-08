@@ -8,7 +8,8 @@
     "start": "next start",
     "biome": "biome ci .",
     "typecheck": "bun --bun tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "fix": "cli tools fix"
   },
   "dependencies": {
     "react": "^18",

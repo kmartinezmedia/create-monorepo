@@ -7,13 +7,14 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "format": "biome format --write .",
+    "fix": "turbo run fix",
     "biome": "turbo run biome",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "test:watch": "turbo run test -- --watch",
     "typecheck": "turbo run typecheck",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "postinstall": "bun ./patches/patch-packages.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "1.4.1",
