@@ -4,6 +4,7 @@
   "extends": "./base.json",
   "compilerOptions": {
     "jsx": "react-native",
+    "customConditions": ["react-native"],
     "moduleResolution": "bundler",
     "target": "ESNext",
     "module": "ESNext",
@@ -24,6 +25,11 @@
       "es2022.array",
       "es2022.object",
       "es2022.string"
-    ]
+    ],
+    "allowJs": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
   }
 }

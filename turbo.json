@@ -21,6 +21,9 @@
     "biome": {
       "dependsOn": ["^build"]
     },
+    "fix": {
+      "cache": false
+    },
     "typecheck": {
       "dependsOn": ["build", "^build"]
     },

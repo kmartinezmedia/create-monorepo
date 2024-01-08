@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "format": "biome format --write .",
+    "fix": "turbo run fix",
     "biome": "turbo run biome",
     "lint": "turbo run lint",
     "test": "turbo run test",
