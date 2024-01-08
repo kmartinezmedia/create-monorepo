@@ -14,17 +14,28 @@ bun install -g eas-cli
 brew install fastlane
 ```
 
+```bash
+brew install cocoapods
+```
+
 __Optional__
 
 ```bash
 npm install -g sharp-cli
 ```
 
+3. Add env vars
+
 ```bash
-brew install cocoapods
+touch .env
 ```
 
-3. Run debug build of mobile app.
+```bash
+EXPO_TOKEN=GRAB FROM EXPO ACCOUNT SETTINGS
+EXPO_PROJECT_ID=GRAB FROM EXPO PROJECT
+```
+
+4. Run debug build of mobile app.
 
 _You only have to build the debug app during initial setup or anytime you add or remove a native dependency_
 
@@ -32,7 +43,7 @@ _You only have to build the debug app during initial setup or anytime you add or
 bun run build:ios-debug
 ```
 
-4. Start react native server for the debug build
+5. Start react native server for the debug build
 
 ```bash
 bun run dev

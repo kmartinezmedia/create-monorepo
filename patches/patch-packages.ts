@@ -16,11 +16,11 @@ const boostUpdatedFile = path.resolve(
 
 const boostPatch = path.resolve(import.meta.dir, './boost.patch');
 
-const proc = Bun.spawnSync(['diff', boostOriginalFile, boostUpdatedFile]);
+const boostDiff = Bun.spawnSync(['diff', boostOriginalFile, boostUpdatedFile]);
 
-const result = await new Response(proc.stdout).text();
+const hasDiff = await new Response(boostDiff.stdout).text();
 
-if (result) {
+if (hasDiff) {
   console.log('running patch');
   Bun.spawnSync(['patch', '-u', boostOriginalFile, '-i', boostPatch]);
   console.log('patch done');

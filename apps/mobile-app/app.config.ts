@@ -45,7 +45,7 @@ export const expo: ExpoConfig = {
       origin: false,
     },
     eas: {
-      projectId: process.env.EAS_PROJECT_ID,
+      projectId: process.env.EXPO_PROJECT_ID,
     },
   },
 };
