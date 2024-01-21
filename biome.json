@@ -1,5 +1,8 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
+  "files": {
+    "ignore": [".next", ".expo", ".turbo", ".env*"]
+  },
   "organizeImports": {
     "enabled": true
   },
@@ -12,8 +15,7 @@
     "enabled": true,
     "rules": {
       "recommended": true
-    },
-    "ignore": [".next"]
+    }
   },
   "formatter": {
     "enabled": true,
@@ -21,7 +23,6 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "lineWidth": 80,
-    "lineEnding": "lf",
-    "ignore": [".next"]
+    "lineEnding": "lf"
   }
 }
