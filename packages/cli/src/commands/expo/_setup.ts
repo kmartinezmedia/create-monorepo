@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { EasJsonAccessor, EasJsonUtils, Platform } from '@expo/eas-json';
 import { type Props, print } from 'bluebun';
 import { $ } from 'bun';
@@ -48,6 +47,9 @@ export async function setup({
     platform,
     profile,
   );
+
+  const easCliConfig = await EasJsonUtils.getCliConfigAsync(easJsonAccessor);
+  const easCliVersion = easCliConfig?.version ?? 'latest';
 
   const {
     APP_BUNDLE_IDENTIFIER,
@@ -154,15 +156,6 @@ export async function setup({
     },
   };
 
-  const easCliPackageJsonPath = require.resolve('eas-cli/package.json');
-  const easCliPackageJson = await Bun.file(easCliPackageJsonPath).json();
-  const easBinField = easCliPackageJson?.bin?.eas;
-  if (!easBinField) {
-    throw new Error('Unable to locate eas-cli binary');
-  }
-  const easPackageJsonDir = path.dirname(easCliPackageJsonPath);
-  const easBin = path.resolve(easPackageJsonDir, easBinField);
-
   return {
     scheme: platform === 'ios' ? appleId : androidId,
     channel: easJsonConfig.channel,
@@ -172,6 +165,6 @@ export async function setup({
     jsEngine,
     appDirectory,
     output,
-    easBin,
+    easCliVersion,
   };
 }

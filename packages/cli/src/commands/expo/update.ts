@@ -6,11 +6,11 @@ export default {
   name: 'update',
   description: '🚀 Update',
   run: async (props: MobileProps) => {
-    const { channel, easBin } = await setup({
+    const { channel, easCliVersion } = await setup({
       props,
     });
 
-    await $`bun --bun ${easBin} update --auto --channel ${channel}`;
+    await $`bunx eas-cli@${easCliVersion} update --auto --channel ${channel}`;
     await $`rm -rf dist`;
   },
 };

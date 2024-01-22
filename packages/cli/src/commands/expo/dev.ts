@@ -15,7 +15,7 @@ export default {
   description: '🚧 Dev',
   run: async (props: MobileStartProps) => {
     console.log('running dev');
-    const { platform, scheme, output, easBin } = await setup({
+    const { platform, scheme, output, easCliVersion } = await setup({
       props,
       env: {
         EXPO_USE_METRO_WORKSPACE_ROOT: '1',
@@ -27,7 +27,7 @@ export default {
       await $`open -a simulator`;
     }
 
-    await $`bun --bun ${easBin} build:run --platform ${platform} --path ${output.launchFile}`;
+    await $`bunx eas-cli@${easCliVersion} build:run --platform ${platform} --path ${output.launchFile}`;
 
     const extraArgs = [];
 

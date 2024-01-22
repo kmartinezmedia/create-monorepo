@@ -6,10 +6,10 @@ export default {
   name: 'launch',
   description: '🚀 Launch',
   run: async (props: MobileProps) => {
-    const { platform, output, easBin } = await setup({
+    const { platform, output, easCliVersion } = await setup({
       props,
     });
 
-    await $`bun --bun ${easBin} build:run --platform ${platform} --path ${output.launchFile}`;
+    await $`bunx eas-cli@${easCliVersion} build:run --platform ${platform} --path ${output.launchFile}`;
   },
 };
