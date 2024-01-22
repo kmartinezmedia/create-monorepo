@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@expo/eas-json": "*",
+    "eas-cli": "^7.0.0",
     "bluebun": "^0.0.34",
     "react-docgen-typescript": "^2.2.2",
     "ts-morph": "^21.0.1",
-    "tsconfig": "workspace:*",
-    "zx": "^7.2.3"
+    "tsconfig": "workspace:*"
   }
 }

@@ -1,6 +1,7 @@
+import path from 'node:path';
 import { EasJsonAccessor, EasJsonUtils, Platform } from '@expo/eas-json';
 import { type Props, print } from 'bluebun';
-import { $ } from 'zx';
+import { $ } from 'bun';
 
 export interface MobileProps extends Props {
   options: {
@@ -11,7 +12,10 @@ export interface MobileProps extends Props {
   };
 }
 
-export async function setup({ props }: { props: MobileProps }) {
+export async function setup({
+  props,
+  env: envOpts,
+}: { props: MobileProps; env?: Partial<typeof Bun.env> }) {
   const {
     profile,
     platform,
@@ -104,21 +108,31 @@ export async function setup({ props }: { props: MobileProps }) {
   const outputDir = `${prebuildsDir}/${outputName}`;
   const outputFileBase = `${outputDir}/${outputName}`;
 
-  $.prefix += `
-  export APP_ANDROID_BUNDLE_IDENTIFIER=${androidId};
-  export APP_APPLE_BUNDLE_IDENTIFIER=${appleId};
-  export RCT_NO_LAUNCH_PACKAGER='1';
-  export EXPO_NO_TELEMETRY='1';
-  export EXPO_NO_WEB_SETUP='1';
-`;
+  let envVars = Bun.env;
+
+  envVars = {
+    ...envVars,
+    APP_ANDROID_BUNDLE_IDENTIFIER: androidId,
+    APP_APPLE_BUNDLE_IDENTIFIER: appleId,
+    RCT_NO_LAUNCH_PACKAGER: '1',
+    EXPO_NO_TELEMETRY: '1',
+    EXPO_NO_WEB_SETUP: '1',
+  };
 
   if (debug) {
-    $.prefix += `
-  export DEBUG = '*';
-  export EAS_LOCAL_BUILD_SKIP_CLEANUP = '1';
-  export EXPO_PROFILE = '1';
-  `;
+    envVars = {
+      ...envVars,
+      DEBUG: '*',
+      EAS_LOCAL_BUILD_SKIP_CLEANUP: '1',
+      EXPO_PROFILE: '1',
+    };
   }
+
+  if (envOpts) {
+    envVars = { ...envVars, ...envOpts };
+  }
+
+  $.env(envVars);
 
   const output = {
     name: outputName,
@@ -139,6 +153,16 @@ export async function setup({ props }: { props: MobileProps }) {
       test: `${outputFileBase}/testBinary.apk`,
     },
   };
+
+  const easCliPackageJsonPath = require.resolve('eas-cli/package.json');
+  const easCliPackageJson = await Bun.file(easCliPackageJsonPath).json();
+  const easBinField = easCliPackageJson?.bin?.eas;
+  if (!easBinField) {
+    throw new Error('Unable to locate eas-cli binary');
+  }
+  const easPackageJsonDir = path.dirname(easCliPackageJsonPath);
+  const easBin = path.resolve(easPackageJsonDir, easBinField);
+
   return {
     scheme: platform === 'ios' ? appleId : androidId,
     channel: easJsonConfig.channel,
@@ -148,5 +172,6 @@ export async function setup({ props }: { props: MobileProps }) {
     jsEngine,
     appDirectory,
     output,
+    easBin,
   };
 }

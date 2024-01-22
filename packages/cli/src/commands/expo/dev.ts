@@ -1,5 +1,5 @@
 import { Props } from 'bluebun';
-import { $ } from 'zx';
+import { $ } from 'bun';
 import type { MobileProps } from './_setup';
 import { setup } from './_setup';
 
@@ -15,18 +15,19 @@ export default {
   description: '🚧 Dev',
   run: async (props: MobileStartProps) => {
     console.log('running dev');
-    const { platform, scheme, output } = await setup({
+    const { platform, scheme, output, easBin } = await setup({
       props,
+      env: {
+        EXPO_USE_METRO_WORKSPACE_ROOT: '1',
+      },
     });
-
-    $.prefix += `export EXPO_USE_METRO_WORKSPACE_ROOT='1';`;
 
     const simExists = await $`xcode-select -p`;
     if (typeof simExists.stdout === 'string') {
       await $`open -a simulator`;
     }
 
-    await $`eas build:run --platform ${platform} --path ${output.launchFile}`;
+    await $`bun --bun ${easBin} build:run --platform ${platform} --path ${output.launchFile}`;
 
     const extraArgs = [];
 
@@ -34,6 +35,8 @@ export default {
       extraArgs.push('--clear');
     }
 
-    await $`expo start --${platform} --dev-client --localhost --scheme ${scheme} ${extraArgs}`;
+    const extrArgsString = extraArgs.join(' ');
+
+    await $`bunx expo start --${platform} --dev-client --localhost --scheme ${scheme} ${extrArgsString}`;
   },
 };

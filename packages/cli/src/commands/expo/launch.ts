@@ -1,4 +1,4 @@
-import { $ } from 'zx';
+import { $ } from 'bun';
 import type { MobileProps } from './_setup';
 import { setup } from './_setup';
 
@@ -6,10 +6,10 @@ export default {
   name: 'launch',
   description: '🚀 Launch',
   run: async (props: MobileProps) => {
-    const { platform, output } = await setup({
+    const { platform, output, easBin } = await setup({
       props,
     });
 
-    await $`eas build:run --platform ${platform} --path ${output.launchFile}`;
+    await $`bun --bun ${easBin} build:run --platform ${platform} --path ${output.launchFile}`;
   },
 };

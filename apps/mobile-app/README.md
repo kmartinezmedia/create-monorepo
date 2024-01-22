@@ -90,7 +90,7 @@ xcrun simctl openurl booted com.katmartinez.mobileappreleasesim://expo-developme
 For debug build
 
 ```shell
-npx uri-scheme open com.katmartinez.mobileappdebugsim://route-name --ios
+bunx uri-scheme open com.katmartinez.mobileappdebugsim://route-name --ios
 ```
 
 or
@@ -102,7 +102,7 @@ xcrun simctl openurl booted com.katmartinez.mobileappdebugsim://route-name
 For release build
 
 ```shell
-npx uri-scheme open com.katmartinez.mobileapprelease://route-name --ios
+bunx uri-scheme open com.katmartinez.mobileapprelease://route-name --ios
 ```
 
 or
