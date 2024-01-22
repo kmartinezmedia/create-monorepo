@@ -10,9 +10,6 @@ export default {
       props,
     });
 
-    // Remove old tarball app
-    await $`rm -rf ${output.artifact}`;
-
     await $`bunx eas-cli@${easCliVersion} build --local --non-interactive --json --clear-cache --platform ${platform} --profile ${profile} --output ${output.artifact}`;
   },
 };
