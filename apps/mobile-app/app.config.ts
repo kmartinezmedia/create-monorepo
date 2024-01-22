@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type { ExpoConfig } from '@expo/config-types';
 
 export const expo: ExpoConfig = {
@@ -31,11 +32,20 @@ export const expo: ExpoConfig = {
       'expo-build-properties',
       {
         ios: {
-          deploymentTarget: '13.0',
+          deploymentTarget: '13.4',
         },
       },
     ],
     'expo-router',
+    [
+      'expo-font',
+      {
+        fonts: [
+          './assets/fonts/SpaceMono-Regular.ttf',
+          './assets/fonts/FontAwesome.ttf',
+        ],
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
