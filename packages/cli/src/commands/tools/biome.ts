@@ -1,10 +1,9 @@
-import { $, cd } from 'zx';
+import { $ } from 'bun';
 
 export default {
   name: 'biome',
   description: '',
   run: async () => {
-    cd(Bun.env.PWD);
     await $`biome ci .`;
   },
 };

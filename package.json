@@ -1,7 +1,7 @@
 {
   "name": "monorepo-template",
   "version": "0.1.0",
-  "packageManager": "bun@1.0.21",
+  "packageManager": "bun@1.0.25",
   "private": true,
   "workspaces": ["packages/*", "apps/*"],
   "scripts": {

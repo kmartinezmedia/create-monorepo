@@ -1,8 +1,7 @@
-import { mkdirSync, watch as fsWatch } from 'node:fs';
+import { watch as fsWatch } from 'node:fs';
 import path from 'node:path';
 import { Props } from 'bluebun';
 import { Project } from 'ts-morph';
-import { cd } from 'zx';
 import { getDocgenParser } from '../../utils/getDocgenParser';
 
 interface BuildProps extends Props {
@@ -32,8 +31,6 @@ export default {
     const WORKSPACE_DIR = Bun.env.PWD ?? '';
     const entrypoints = entrypointsString.split(',');
 
-    cd(WORKSPACE_DIR);
-
     const tsconfigFile = path.resolve(WORKSPACE_DIR, 'tsconfig.json');
 
     // Clean old dist directory
@@ -42,12 +39,9 @@ export default {
       await rmProcess.exited;
     }
 
-    mkdirSync(outDir, { recursive: true });
-
     async function build() {
       console.log('Building...');
       try {
-        mkdirSync(outDir, { recursive: true });
         const tsConfigParser = getDocgenParser(tsconfigFile);
         const tsMorphProject = new Project();
         const rootTypesFile = path.resolve(WORKSPACE_DIR, typesFile);
@@ -58,7 +52,6 @@ export default {
           const docData = tsConfigParser.parse(filePath);
           const { dir, ext } = path.parse(filePath);
           const docDest = filePath.replace(dir, outDir).replace(ext, '.md');
-          console.log(docDest);
 
           const docFile = Bun.file(docDest);
           const writer = docFile.writer();
