@@ -12,6 +12,5 @@ declare module 'bun' {
     EXPO_PROFILE?: string;
     EXPO_USE_METRO_WORKSPACE_ROOT?: string;
     EXPO_BUNDLE_APP?: string;
-    ESLINT_USE_FLAT_CONFIG?: string;
   }
 }
