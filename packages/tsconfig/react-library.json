@@ -1,8 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "React Library",
-  "extends": "./react-app.json",
+  "extends": "./base.json",
   "compilerOptions": {
+    "jsx": "preserve",
     "moduleResolution": "bundler"
   }
 }

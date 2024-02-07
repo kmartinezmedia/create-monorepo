@@ -15,7 +15,6 @@
   "dependencies": {
     "@expo/eas-json": "*",
     "bluebun": "^0.0.34",
-    "react-docgen-typescript": "^2.2.2",
     "ts-morph": "^21.0.1",
     "tsconfig": "workspace:*"
   }
