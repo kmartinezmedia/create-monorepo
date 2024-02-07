@@ -1,4 +1,3 @@
-// import { Navigation } from 'mdxts/components'
 import { data } from '#docgen/data';
 import { DocgenSource, DocgenSourceList } from '#docgen/types';
 

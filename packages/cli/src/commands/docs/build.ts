@@ -86,22 +86,22 @@ export const data = {
 
     await build();
 
-    // if (props.options.watch) {
-    //   const watcher = fsWatch(
-    //     watchDir,
-    //     { recursive: true },
-    //     async (event, filename) => {
-    //       console.log(`Detected ${event} in ${filename}`);
-    //       await build();
-    //     },
-    //   );
+    if (props.options.watch) {
+      const watcher = fsWatch(
+        input,
+        { recursive: true },
+        async (event, filename) => {
+          console.log(`Detected ${event} in ${filename}`);
+          await build();
+        },
+      );
 
-    //   process.on('SIGINT', () => {
-    //     // close watcher when Ctrl-C is pressed
-    //     console.log('Closing watcher...');
-    //     watcher.close();
-    //     process.exit(0);
-    //   });
-    // }
+      process.on('SIGINT', () => {
+        // close watcher when Ctrl-C is pressed
+        console.log('Closing watcher...');
+        watcher.close();
+        process.exit(0);
+      });
+    }
   },
 };

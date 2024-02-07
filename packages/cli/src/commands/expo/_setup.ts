@@ -1,30 +1,144 @@
+import fs from 'node:fs';
+import os from 'node:os';
 import { EasJsonAccessor, EasJsonUtils, Platform } from '@expo/eas-json';
 import { type Props, print } from 'bluebun';
-import { $ } from 'bun';
+import { $, semver, which } from 'bun';
 
 export interface MobileProps extends Props {
   options: {
     profile: string;
-    platform: Platform.IOS | Platform.ANDROID;
+    platform: Platform;
     jsEngine?: 'hermes' | 'jsc';
     debug?: boolean;
   };
 }
 
+export async function needsBinary(lib: string) {
+  return which(lib) === null;
+}
+
+export async function needsBrewFormula(formula: string) {
+  return (
+    (await $`brew list --formula | grep ${formula} | wc -l`.text()).trim() ===
+    '0'
+  );
+}
+
 export async function setup({
   props,
   env: envOpts,
-}: { props: MobileProps; env?: Partial<typeof Bun.env> }) {
+}: {
+  props: MobileProps;
+  env?: Partial<typeof Bun.env>;
+}) {
   const {
     profile,
     platform,
     jsEngine = 'hermes',
     debug = false,
   } = props.options;
+  const isIOS = platform === Platform.IOS;
+  const isAndroid = platform === Platform.ANDROID;
+  const pathAsString = await $`echo $PATH`.text();
+  const needsBunInPath = !pathAsString.includes('.bun');
 
-  const appDirectory = Bun.env.PWD ?? '';
+  /* -------------------------------------------------------------------------- */
+  /*                            VERIFY BUN IS IN PATH                           */
+  /* -------------------------------------------------------------------------- */
+  if (needsBunInPath) {
+    /**
+     * If BUN_INSTALL is not in the path, we need to add it.
+     * https://bun.sh/docs/installation#checking-installation:~:text=shell%27s%20configuration%20file.
+     */
+    console.write(
+      'BUN is not installed globally or is not available in your $PATH. Adding to your $PATH...',
+    );
+    const whichShell = await $`echo $SHELL`.text();
+    const homeDirectory = os.homedir();
+    const shellRcFile = whichShell.includes('zsh') ? '.zshrc' : '.bashrc';
+    fs.appendFileSync(
+      `${homeDirectory}/${shellRcFile}`,
+      '\n# bun\nexport BUN_INSTALL="$HOME/.bun"\nexport PATH="$BUN_INSTALL/bin:$PATH"',
+    );
+    await $`source $HOME/${shellRcFile}`;
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                 XCODE SETUP                                */
+  /* -------------------------------------------------------------------------- */
+  if (isIOS) {
+    const xcodePath = await $`xcode-select -p`.text();
+
+    if (xcodePath) {
+      const isInvalidXcodePath = !xcodePath.startsWith('/Applications');
+
+      if (isInvalidXcodePath) {
+        console.write(`
+        /* -------------------------------------------------------------------------- */
+        /*                           XCODDE PATH IS INVALID                           */
+        /* -------------------------------------------------------------------------- */
+
+        Run the following command to set the correct path to XCode:
+
+        sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+        `);
+      }
+    } else {
+      console.write(`
+        /* -------------------------------------------------------------------------- */
+        /*                             XCODE NOT INSTALLED                            */
+        /* -------------------------------------------------------------------------- */
+
+        You must have XCode installed before continuing...
+
+        Visit https://apps.apple.com/us/app/xcode/id497799835?mt=12 to download.
+      `);
+      throw new Error('XCode not installed');
+    }
+
+    /**
+     * Installing the XCode command line tools & simulators normally
+     * requires opening up XCode to install.
+     * This conditional is to avoid having to do that.
+     *
+     * If xcode command line tools and simulators have already been installed, that's
+     * fine. This command is really fast and will continue running if already available.
+     *
+     * https://developer.apple.com/documentation/xcode/installing-additional-simulator-runtimes#Install-and-manage-Simulator-runtimes-from-the-command-line
+     */
+    await $`xcodebuild -runFirstLaunch`;
+    await $`xcodebuild -downloadPlatform iOS`;
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                            JAVA DEVELOPMENT KIT                            */
+  /* -------------------------------------------------------------------------- */
+  if (isAndroid) {
+    const jdkPath = await $`brew info --cask zulu17`.text();
+    const needsJdk = jdkPath.includes('unavailable');
+    if (needsJdk) {
+      console.write('Installing Java Development Kit for Android...');
+      await $`brew install --cask zulu17`;
+    }
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                              EAS CONFIG SETUP                              */
+  /* -------------------------------------------------------------------------- */
+  /**
+   * eas.json is used to define build profiles for different environments.
+   * For example, you may have a profile for development, staging, and production.
+   *
+   * The EAS CLI is used to build and run an app locally based on the eas.json,
+   * but it isn't opinionated about how you define your profiles.
+   *
+   * We however want to enforce some conventions to make it easier to get started.
+   * We also want to store our builds outside of EAS ecosystem since they auto
+   * delete after 30 days & our builds infrequently.
+   *
+   */
+  const appDirectory = Bun.env.PWD;
   const easJsonAccessor = EasJsonAccessor.fromProjectPath(appDirectory);
-
   const easProfiles =
     await EasJsonUtils.getBuildProfileNamesAsync(easJsonAccessor);
 
@@ -47,9 +161,24 @@ export async function setup({
     platform,
     profile,
   );
-
   const easCliConfig = await EasJsonUtils.getCliConfigAsync(easJsonAccessor);
   const easCliVersion = easCliConfig?.version ?? 'latest';
+
+  /* -------------------------------------------------------------------------- */
+  /*                                EAS CLI SETUP                               */
+  /* -------------------------------------------------------------------------- */
+  /**
+   * EAS CLI is used to build and run an app locally.
+   */
+  const needsEasCli = await needsBinary('eas');
+  if (needsEasCli) {
+    await $`bun install eas-cli@${easCliVersion} -g`.quiet();
+  } else {
+    const currentEasCliVersion = await $`eas --version`.text();
+    if (!semver.satisfies(currentEasCliVersion, easCliVersion)) {
+      await $`bun install eas-cli@${easCliVersion} -g`.quiet();
+    }
+  }
 
   const {
     APP_BUNDLE_IDENTIFIER,
@@ -58,7 +187,7 @@ export async function setup({
   } = easJsonConfig.env ?? {};
 
   // TODO: Add additional checks for ensuring this value adheres to Android formatting specs
-  if (platform === Platform.ANDROID && !androidId) {
+  if (isAndroid && !androidId) {
     throw new Error(`
       APP_ANDROID_BUNDLE_IDENTIFIER must be defined in eas.json within the ${profile} > env config.
       See https://docs.expo.dev/build-reference/variables/#setting-plaintext-environment-variables-in-easjson for information about env variables in eas.json
@@ -82,7 +211,7 @@ export async function setup({
   }
 
   // TODO: Add additional checks for ensuring this value adheres to Uniform Type Identifier
-  if (platform === Platform.IOS && !appleId) {
+  if (isIOS && !appleId) {
     throw new Error(`
       APP_APPLE_BUNDLE_IDENTIFIER must be defined in eas.json within the ${profile} > env config.
       See https://docs.expo.dev/build-reference/variables/#setting-plaintext-environment-variables-in-easjson for information about env variables in eas.json
@@ -105,11 +234,13 @@ export async function setup({
   }
 
   const outputName = `${platform}-${profile}-${jsEngine}`;
-  // TODO: make this configurable
-  const prebuildsDir = `${appDirectory}/prebuilds`;
+  const prebuildsDir = `${appDirectory}/prebuilds`; // TODO: make this configurable
   const outputDir = `${prebuildsDir}/${outputName}`;
   const outputFileBase = `${outputDir}/${outputName}`;
 
+  /* -------------------------------------------------------------------------- */
+  /*                            ENVIRONMENT VARIABLES                           */
+  /* -------------------------------------------------------------------------- */
   let envVars = Bun.env;
 
   envVars = {
@@ -134,6 +265,7 @@ export async function setup({
     envVars = { ...envVars, ...envOpts };
   }
 
+  /** Change the default environment variables for shells created by this instance. */
   $.env(envVars);
 
   const output = {
@@ -141,11 +273,10 @@ export async function setup({
     dir: outputDir,
     prebuildsDir: prebuildsDir,
     fileBase: outputFileBase,
-    artifact:
-      platform === 'ios' ? `${outputFileBase}.tar.gz` : `${outputFileBase}.zip`,
-    app: platform === 'ios' ? `${outputFileBase}.app` : 'todo fix android',
+    artifact: isIOS ? `${outputFileBase}.tar.gz` : `${outputFileBase}.zip`,
+    app: isIOS ? `${outputFileBase}.app` : 'todo fix android',
     get launchFile() {
-      return platform === 'ios' ? this.artifact : this.apk.signed;
+      return isIOS ? this.artifact : this.apk.signed;
     },
     apk: {
       contents: `${outputFileBase}/build`,
@@ -157,7 +288,7 @@ export async function setup({
   };
 
   return {
-    scheme: platform === 'ios' ? appleId : androidId,
+    scheme: isIOS ? appleId : androidId,
     channel: easJsonConfig.channel,
     debug,
     profile,
@@ -165,6 +296,5 @@ export async function setup({
     jsEngine,
     appDirectory,
     output,
-    easCliVersion,
   };
 }
