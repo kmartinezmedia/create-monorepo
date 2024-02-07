@@ -28,8 +28,8 @@
   },
   "imports": {
     "#docgen/*": {
-      "types": "./docgen/*.ts",
-      "default": "./docgen/*.ts"
+      "types": "./.docgen/*.ts",
+      "default": "./.docgen/*.ts"
     }
   }
 }
