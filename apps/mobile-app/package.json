@@ -10,7 +10,7 @@
     "patch:ios-release-simulator": "cli expo patch --platform ios --profile release-simulator",
     "launch:ios-release-simulator": "cli expo launch --platform ios --profile release-simulator",
     "update:preview": "cli expo update --platform ios --profile release-simulator",
-    "biome": "cli tools biome",
+    "lint": "cli tools lint",
     "typecheck": "cli tools typecheck",
     "fix": "cli tools fix"
   },

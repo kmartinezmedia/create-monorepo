@@ -1,7 +1,7 @@
 import { $ } from 'bun';
 
 export default {
-  name: 'biome',
+  name: 'lint',
   description: '',
   run: async () => {
     await $`biome ci .`;
