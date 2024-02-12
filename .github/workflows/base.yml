@@ -17,10 +17,12 @@ jobs:
         uses: actions/checkout@v4
       - name: 🏗 Setup Bun
         uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.0.26
       - name: 💾 Install dependencies
         run: bun install --frozen-lockfile
-      - name: 🧹 Biome
-        run: bun run biome
+      - name: 🧹 Lint
+        run: bun run lint
       - name: 🧹 Typecheck
         run: bun run typecheck
       - name: 🧪 Test

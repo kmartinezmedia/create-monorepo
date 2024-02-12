@@ -5,5 +5,6 @@ export default {
   description: '',
   run: async () => {
     await $`biome check --apply .`;
+    await $`biome format --write .`;
   },
 };

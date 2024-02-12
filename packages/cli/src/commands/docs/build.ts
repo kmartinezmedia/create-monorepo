@@ -9,7 +9,7 @@ interface BuildProps extends Props {
      */
     input: string;
     /** Where to output docgen data
-     * @default 'docgen'
+     * @default '.docgen'
      */
     output?: string;
     /** Whether to watch source files for changes */
@@ -21,7 +21,7 @@ export default {
   name: 'build',
   description: '🚀 Build',
   run: async (props: BuildProps) => {
-    const { input, output = `${Bun.env.PWD}/docgen`, watch } = props.options;
+    const { input, output = `${Bun.env.PWD}/.docgen`, watch } = props.options;
 
     // Copy docgen types to consuming app
     const localTypes = await Bun.file(
@@ -34,12 +34,10 @@ export default {
     const pkgDir = path.dirname(pkgJsonPath);
     const tsConfigFilePath = path.resolve(pkgDir, 'tsconfig.json');
 
-    console.log('tsconfigFile', tsConfigFilePath);
-
     let sourceFiles = [];
 
     async function build() {
-      console.log('Building...');
+      console.log('docgen: building...');
       const project = new Project({
         tsConfigFilePath,
       });
@@ -77,28 +75,25 @@ export const data = {
   },
 } satisfies DocgenSourceList;`,
       );
-      console.log(sourceFiles);
-    }
-
-    if (props.options.watch) {
-      console.log('Watching for changes...');
+      // console.log(sourceFiles);
     }
 
     await build();
 
     if (props.options.watch) {
+      console.log('docgen: watching for changes...');
       const watcher = fsWatch(
         input,
         { recursive: true },
         async (event, filename) => {
-          console.log(`Detected ${event} in ${filename}`);
+          console.log(`docgen: detected ${event} in ${filename}`);
           await build();
         },
       );
 
       process.on('SIGINT', () => {
         // close watcher when Ctrl-C is pressed
-        console.log('Closing watcher...');
+        console.log('docgen: closing watcher...');
         watcher.close();
         process.exit(0);
       });

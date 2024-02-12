@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "bun --bun next dev",
-    "build": "next build",
+    "build": "bun run docgen && next build",
     "docgen": "cli docs build --input @fake/components",
     "start": "next start",
-    "biome": "biome ci .",
-    "typecheck": "bun --bun tsc --noEmit",
+    "lint": "cli tools lint",
+    "typecheck": "cli tools typecheck",
     "test": "bun test",
     "fix": "cli tools fix"
   },

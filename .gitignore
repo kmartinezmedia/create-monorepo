@@ -129,3 +129,6 @@ expo-env.d.ts
 
 # Turbo
 .turbo
+
+# Docgen
+.docgen

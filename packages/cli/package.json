@@ -6,7 +6,7 @@
     "cli": "./bin"
   },
   "scripts": {
-    "biome": "./bin tools biome",
+    "lint": "./bin tools lint",
     "typecheck": "./bin tools typecheck",
     "clean": "./bin tools clean",
     "test": "bun test",
