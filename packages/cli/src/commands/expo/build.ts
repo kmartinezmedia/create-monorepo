@@ -1,4 +1,5 @@
 import { $, semver } from 'bun';
+
 import {
   type MobileProps,
   needsBinary,
@@ -75,28 +76,22 @@ export default {
     /* -------------------------------------------------------------------------- */
     const needsCocoapods = await needsBrewFormula('cocoapods');
     /** https://github.com/facebook/react-native/issues/42698#issuecomment-1915670708 */
-    const validCocoapodsVersion = '1.14.3';
-
-    const installCocoapods = async () =>
-      await $`brew install ${import.meta.dirname}/install/cocoapods.rb`;
+    const validCocoapodsVersion = '>1.15.2';
 
     if (needsCocoapods) {
       console.write('Installing cocoapods...');
-      await installCocoapods();
+      await $`brew install cocoapods`;
     } else {
       const cocoapodsVersion = await $`pod --version`.text();
-      const needsDowngrade = semver.satisfies(
+      const needsUpgrade = semver.satisfies(
         cocoapodsVersion,
-        `>${validCocoapodsVersion}`,
+        validCocoapodsVersion,
       );
-      if (needsDowngrade) {
-        await $`brew unlink cocoapods`;
-        await $`brew uninstall cocoapods`;
+      if (needsUpgrade) {
         console.write(
-          `Downgrading cocoapods from ${cocoapodsVersion} to ${validCocoapodsVersion}...`,
+          `Upgrading cocoapods from ${cocoapodsVersion} to ${validCocoapodsVersion}...`,
         );
-        await installCocoapods();
-        await $`brew link cocoapods`;
+        await $`brew upgrade cocoapods`;
       }
     }
 

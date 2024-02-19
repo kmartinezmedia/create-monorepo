@@ -1,4 +1,5 @@
 import { $ } from 'bun';
+
 import type { MobileProps } from './_setup';
 import { setup } from './_setup';
 
