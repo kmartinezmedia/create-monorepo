@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import os from 'node:os';
+
 import { EasJsonAccessor, EasJsonUtils, Platform } from '@expo/eas-json';
 import { type Props, print } from 'bluebun';
 import { $, semver, which } from 'bun';
@@ -82,6 +83,7 @@ export async function setup({
 
         sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
         `);
+        throw new Error('XCode path invalid');
       }
     } else {
       console.write(`
@@ -271,7 +273,7 @@ export async function setup({
   const output = {
     name: outputName,
     dir: outputDir,
-    prebuildsDir: prebuildsDir,
+    prebuildsDir,
     fileBase: outputFileBase,
     artifact: isIOS ? `${outputFileBase}.tar.gz` : `${outputFileBase}.zip`,
     app: isIOS ? `${outputFileBase}.app` : 'todo fix android',
